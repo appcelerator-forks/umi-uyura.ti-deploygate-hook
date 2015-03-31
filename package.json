@@ -1,0 +1,20 @@
+{
+  "name": "ti-deploygate-hook",
+  "version": "0.1.0",
+  "description": "Titanium CLI hook for deploying builds to DeployGate",
+  "scripts": {
+    "postinstall": "node bin/install"
+  },
+  "bin": {
+    "ti-deploygate-hook": "./bin/install"
+  },
+  "keywords": [
+    "titanium",
+    "cli",
+    "appcelerator",
+    "hook",
+    "deploygate"
+  ],
+  "author": "Umi Uyura <umiuyura@gmail.com>",
+  "license": "MIT"
+}
