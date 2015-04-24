@@ -20,7 +20,7 @@ Install
 -------
 
 ```
-$ [sudo] npm i -g umi-uyura/ti-deploygate-hook
+$ [sudo] npm i -g ti-deploygate-hook
 ti-deploygate-hook hook installed
 ```
 
