@@ -3,7 +3,8 @@
   "version": "0.1.1",
   "description": "Titanium CLI hook for deploying builds to DeployGate",
   "scripts": {
-    "postinstall": "node bin/install"
+    "postinstall": "node bin/install",
+    "preuninstall": "node bin/uninstall"
   },
   "bin": {
     "ti-deploygate-hook": "./bin/install"
