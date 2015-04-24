@@ -1,6 +1,6 @@
 {
   "name": "ti-deploygate-hook",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Titanium CLI hook for deploying builds to DeployGate",
   "scripts": {
     "postinstall": "node bin/install",
