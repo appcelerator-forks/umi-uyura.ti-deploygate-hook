@@ -25,9 +25,6 @@ exports.cliVersion = '>=3.2';
  * @param {Object} appc - The node-appc library
  */
 exports.init = function init(logger, config, cli, appc) {
-  cli.on('cli:post-validate', function() {
-    logger.info('DeployGate Plugin: loaded');
-  });
   cli.on('build.finalize', function () {
     if (undefined !== cli.argv.dgate) {
       dgatePush(logger,
