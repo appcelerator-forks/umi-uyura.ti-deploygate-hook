@@ -28,6 +28,7 @@ exports.init = function init(logger, config, cli, appc) {
   cli.on('build.finalize', function () {
     if (undefined !== cli.argv.dgate) {
       dgatePush(logger,
+                cli.sdk.manifest.version,
                 cli.tiapp.name,
                 cli.argv['project-dir'],
                 cli.argv.platform,
@@ -41,13 +42,14 @@ exports.init = function init(logger, config, cli, appc) {
  * Push to DeployGate
  *
  * @param {Object} logger - The logger instance
+ * @param {String} version - SDK Version
  * @param {String} name - Application name (base for binary file name）
  * @param {String} project_dir - Project directory path
  * @param {String} platform - Platform name
  * @param {String} target - Target build platform
  * @param {String} message - Optional message of this push
  */
-var dgatePush = function(logger, name, project_dir, platform, target, message) {
+var dgatePush = function(logger, version, name, project_dir, platform, target, message) {
   var appfile = null;
 
   logger.debug('DeployGate Plugin: Platform = ' + platform + ', target = ' + target);
@@ -57,7 +59,11 @@ var dgatePush = function(logger, name, project_dir, platform, target, message) {
       logger.info('DeployGate Plugin: In the case of simulator, plugin does not perform');
       return;
     }
-    appfile = '/build/iphone/build/' + ('device' === target ? 'Debug' : 'Release') + '-iphoneos/' + name + '.ipa';
+    appfile = '/build/iphone/build/';
+    if (parseFloat('5.0') <= parseFloat(version)) {   // TODO: Release時のフォルダ構成
+      appfile += 'Products/';
+    }
+    appfile += ('device' === target ? 'Debug' : 'Release') + '-iphoneos/' + name + '.ipa';
   } else if ('android' === platform) {
     appfile = '/build/android/bin/' + name + '.apk';
   } else {
