@@ -60,7 +60,8 @@ var dgatePush = function(logger, version, name, project_dir, platform, target, m
       return;
     }
     appfile = '/build/iphone/build/';
-    if (parseFloat('5.0') <= parseFloat(version)) {   // TODO: Release時のフォルダ構成
+    if (5.0 <= parseFloat(version)) {
+      logger.debug('DeployGate Plugin: Titanium SDK 5.0 or later');
       appfile += 'Products/';
     }
     appfile += ('device' === target ? 'Debug' : 'Release') + '-iphoneos/' + name + '.ipa';
