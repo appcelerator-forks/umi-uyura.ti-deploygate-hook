@@ -7,8 +7,7 @@
 
 'use strict';
 
-var exec = require('child_process').exec,
-    path = require('path');
+var exec = require('child_process').exec;
 
 /** The plugin's identifier */
 // exports.id = 'com.example.hook';
