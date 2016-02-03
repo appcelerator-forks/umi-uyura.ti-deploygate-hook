@@ -25,30 +25,41 @@ exports.cliVersion = '>=3.2';
  */
 exports.init = function init(logger, config, cli, appc) {
   cli.on('build.finalize', function () {
-    if (undefined !== cli.argv.dgate) {
-      dgatePush(logger,
-                cli.sdk.manifest.version,
-                cli.tiapp.name,
-                cli.argv['project-dir'],
-                cli.argv.platform,
-                cli.argv.target,
-                cli.argv.dgate);
+    var message = cli.argv.dg || cli.argv.dgate;
+    if (!message) {
+      return;
     }
+
+    var path = getTargetPath(logger,
+                             cli.sdk.manifest.version,
+                             cli.tiapp.name,
+                             cli.argv.platform,
+                             cli.argv.target);
+    if (!path) {
+      return;
+    }
+
+    var command = cli.argv.dg ? 'dg' : 'dgate';
+
+    pushDeployGate(logger,
+                   path,
+                   cli.argv['project-dir'],
+                   cli.argv.target,
+                   command,
+                   message);
   });
 };
 
 /**
- * Push to DeployGate
+ * Get app binary path
  *
  * @param {Object} logger - The logger instance
  * @param {String} version - SDK Version
  * @param {String} name - Application name (base for binary file name）
- * @param {String} project_dir - Project directory path
  * @param {String} platform - Platform name
  * @param {String} target - Target build platform
- * @param {String} message - Optional message of this push
  */
-var dgatePush = function(logger, version, name, project_dir, platform, target, message) {
+function getTargetPath(logger, version, name, platform, target) {
   var appfile = null;
 
   logger.debug('DeployGate Plugin: Platform = ' + platform + ', target = ' + target);
@@ -56,7 +67,7 @@ var dgatePush = function(logger, version, name, project_dir, platform, target, m
   if ('ios' === platform || 'iphone' === platform || 'ipad' === platform) {
     if ('simulator' === target) {
       logger.info('DeployGate Plugin: In the case of simulator, plugin does not perform');
-      return;
+      return '';
     }
     appfile = '/build/iphone/build/';
     if (5.0 <= parseFloat(version)) {
@@ -68,16 +79,47 @@ var dgatePush = function(logger, version, name, project_dir, platform, target, m
     appfile = '/build/android/bin/' + name + '.apk';
   } else {
     logger.info('DeployGate Plugin: Platform "' + platform + '" is not a target');
+    return '';
+  }
+
+  return appfile;
+}
+
+/**
+ * Push to DeployGate
+ *
+ * @param {Object} logger - The logger instance
+ * @param {String} path - Binary file path
+ * @param {String} project_dir - Project directory path
+ * @param {String} command - Optional message of this push
+ * @param {String} message - Optional message of this push
+ */
+var pushDeployGate = function(logger, path, project_dir, command, message) {
+  var commands = [
+    { command: 'dg', subcommand: 'deploy' },
+    { command: 'dgate', subcommand: 'push' }
+  ];
+
+  var push_command = null;
+  for (var i = 0; i < commands.length; i++) {
+    if (command === commands[i].command) {
+      push_command = commands[i];
+      break;
+    }
+  }
+
+  if (!push_command) {
+    logger.error('DeployGate Plugin: Unkown push command - ' + command);
     return;
   }
 
-  var push_cmd = 'dgate push "' + project_dir + appfile + '"';
+  var dg_command = push_command.command + ' ' + push_command.subcommand + ' "' + project_dir + path + '"';
   if (message) {
-    push_cmd += ' -m "' + message + '"';
+    dg_command += ' --message "' + message + '"';
   }
-  logger.debug(push_cmd);
+  logger.debug(dg_command);
 
-  exec(push_cmd, function(error, stdout, stderr) {
+  exec(dg_command, function(error, stdout, stderr) {
     if (error) {
       logger.error('DeployGate Plugin: Push failed');
       if (stderr) {
