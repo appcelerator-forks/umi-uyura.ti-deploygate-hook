@@ -7,7 +7,8 @@
 
 'use strict';
 
-var exec = require('child_process').exec;
+var exec = require('child_process').exec,
+    path = require('path');
 
 /** The plugin's identifier */
 // exports.id = 'com.example.hook';
@@ -40,17 +41,17 @@ exports.init = function init(logger, config, cli, appc) {
     var message = dg || dgate;
     logger.debug('DeployGate Plugin: message = ' + message);
 
-    var path = getTargetPath(logger,
-                             cli.sdk.manifest.version,
-                             cli.tiapp.name,
-                             cli.argv.platform,
-                             cli.argv.target);
-    if (!path) {
+    var target_path = getTargetPath(logger,
+                                    cli.sdk.manifest.version,
+                                    cli.tiapp.name,
+                                    cli.argv.platform,
+                                    cli.argv.target);
+    if (!target_path) {
       return;
     }
 
     pushDeployGate(logger,
-                   path,
+                   target_path,
                    cli.argv['project-dir'],
                    command,
                    message);
@@ -67,7 +68,7 @@ exports.init = function init(logger, config, cli, appc) {
  * @param {String} target - Target build platform
  */
 function getTargetPath(logger, version, name, platform, target) {
-  var appfile = null;
+  var apppath = null;
 
   logger.debug('DeployGate Plugin: Platform = ' + platform + ', target = ' + target);
 
@@ -76,20 +77,20 @@ function getTargetPath(logger, version, name, platform, target) {
       logger.info('DeployGate Plugin: In the case of simulator, plugin does not perform');
       return '';
     }
-    appfile = '/build/iphone/build/';
+    apppath = '/build/iphone/build/';
     if (5.0 <= parseFloat(version)) {
       logger.debug('DeployGate Plugin: Titanium SDK 5.0 or later');
-      appfile += 'Products/';
+      apppath = path.join(apppath, 'Products');
     }
-    appfile += ('device' === target ? 'Debug' : 'Release') + '-iphoneos/' + name + '.ipa';
+    apppath = path.join(apppath, ('device' === target ? 'Debug' : 'Release') + '-iphoneos/' + name + '.ipa');
   } else if ('android' === platform) {
-    appfile = '/build/android/bin/' + name + '.apk';
+    apppath = path.join('/build/android/bin/', name + '.apk');
   } else {
     logger.info('DeployGate Plugin: Platform "' + platform + '" is not a target');
     return '';
   }
 
-  return appfile;
+  return apppath;
 }
 
 /**
