@@ -25,10 +25,20 @@ exports.cliVersion = '>=3.2';
  */
 exports.init = function init(logger, config, cli, appc) {
   cli.on('build.finalize', function () {
-    var message = cli.argv.dg || cli.argv.dgate;
-    if (!message) {
+    logger.debug('DeployGate Plugin: dg = ' + cli.argv.dg + ' / dgate = ' + cli.argv.dgate);
+
+    if (undefined === cli.argv.dg && undefined === cli.argv.dgate) {
       return;
     }
+
+    var command = (undefined !== cli.argv.dg) ? 'dg' : 'dgate';
+    logger.debug('DeployGate Plugin: Use command = ' + command);
+
+    var dg = cli.argv.dg || '';
+    var dgate = cli.argv.dgate || '';
+
+    var message = dg || dgate;
+    logger.debug('DeployGate Plugin: message = ' + message);
 
     var path = getTargetPath(logger,
                              cli.sdk.manifest.version,
@@ -39,12 +49,9 @@ exports.init = function init(logger, config, cli, appc) {
       return;
     }
 
-    var command = cli.argv.dg ? 'dg' : 'dgate';
-
     pushDeployGate(logger,
                    path,
                    cli.argv['project-dir'],
-                   cli.argv.target,
                    command,
                    message);
   });
@@ -117,7 +124,7 @@ var pushDeployGate = function(logger, path, project_dir, command, message) {
   if (message) {
     dg_command += ' --message "' + message + '"';
   }
-  logger.debug(dg_command);
+  logger.debug('DeployGate Plugin: execute = ' + dg_command);
 
   exec(dg_command, function(error, stdout, stderr) {
     if (error) {
